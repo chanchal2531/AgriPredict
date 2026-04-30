@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgriPredict — Smart Crop Prediction & Risk Analysis</title>
+  <meta name="description" content="AI-powered crop production prediction and risk analysis using Random Forest ML models. Enter your crop, state, area, and year to get instant predictions." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Animated background particles -->
+  <div class="bg-particles" id="bgParticles"></div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">🌾</div>
+        <span class="logo-text">AgriPredict</span>
+      </div>
+      <div class="header-badge">
+        <span class="badge-dot" id="statusDot"></span>
+        <span id="statusText">Connecting…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-tag">Powered by Random Forest ML</div>
+      <h1 class="hero-title">Smart Crop <span class="gradient-text">Prediction</span><br />& Risk Analysis</h1>
+      <p class="hero-sub">Predict crop production, yield, and risk levels for any Indian state using trained machine learning models on 246,000+ historical records.</p>
+    </section>
+
+    <!-- PREDICTION FORM CARD -->
+    <section class="form-section">
+      <div class="card form-card">
+        <div class="card-header">
+          <h2 class="card-title">Enter Crop Details</h2>
+          <p class="card-sub">Fill in all fields to get your prediction</p>
+        </div>
+
+        <form id="predictForm" class="predict-form" novalidate>
+
+          <div class="form-grid">
+
+            <!-- Crop -->
+            <div class="form-group">
+              <label for="cropSelect" class="form-label">
+                <span class="label-icon">🌱</span> Crop
+              </label>
+              <div class="select-wrap">
+                <select id="cropSelect" name="crop" class="form-control" required>
+                  <option value="">Select a crop…</option>
+                </select>
+                <span class="select-arrow">▾</span>
+              </div>
+              <span class="field-error" id="cropError"></span>
+            </div>
+
+            <!-- State -->
+            <div class="form-group">
+              <label for="stateSelect" class="form-label">
+                <span class="label-icon">📍</span> State
+              </label>
+              <div class="select-wrap">
+                <select id="stateSelect" name="state" class="form-control" required>
+                  <option value="">Select a state…</option>
+                </select>
+                <span class="select-arrow">▾</span>
+              </div>
+              <span class="field-error" id="stateError"></span>
+            </div>
+
+            <!-- Area -->
+            <div class="form-group">
+              <label for="areaInput" class="form-label">
+                <span class="label-icon">📐</span> Area (hectares)
+              </label>
+              <input type="number" id="areaInput" name="area" class="form-control"
+                     placeholder="e.g. 100" min="0.1" step="0.1" required />
+              <span class="field-error" id="areaError"></span>
+            </div>
+
+            <!-- Year -->
+            <div class="form-group">
+              <label for="yearInput" class="form-label">
+                <span class="label-icon">📅</span> Crop Year
+              </label>
+              <input type="number" id="yearInput" name="year" class="form-control"
+                     placeholder="e.g. 2015" min="1997" max="2025" required />
+              <span class="field-error" id="yearError"></span>
+            </div>
+
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-predict" id="submitBtn">
+            <span class="btn-icon">⚡</span>
+            <span class="btn-label">Predict Now</span>
+            <span class="btn-spinner" id="btnSpinner"></span>
+          </button>
+
+          <!-- API Error -->
+          <div class="api-error" id="apiError" hidden>
+            <span class="api-error-icon">⚠️</span>
+            <span id="apiErrorMsg"></span>
+          </div>
+
+        </form>
+      </div>
+    </section>
+
+    <!-- RESULTS SECTION -->
+    <section class="results-section" id="resultsSection" hidden>
+      <h2 class="results-title">Prediction Results</h2>
+
+      <div class="results-grid">
+
+        <!-- Production -->
+        <div class="result-card" id="cardProduction">
+          <div class="result-icon">🏭</div>
+          <div class="result-label">Predicted Production</div>
+          <div class="result-value" id="valProduction">—</div>
+          <div class="result-unit">metric tonnes</div>
+        </div>
+
+        <!-- Yield -->
+        <div class="result-card" id="cardYield">
+          <div class="result-icon">📈</div>
+          <div class="result-label">Predicted Yield</div>
+          <div class="result-value" id="valYield">—</div>
+          <div class="result-unit">tonnes / hectare</div>
+        </div>
+
+        <!-- Risk -->
+        <div class="result-card risk-card" id="cardRisk">
+          <div class="result-icon" id="riskIcon">🛡️</div>
+          <div class="result-label">Risk Category</div>
+          <div class="result-value risk-value" id="valRisk">—</div>
+          <div class="risk-bar-wrap">
+            <div class="risk-bar" id="riskBar"></div>
+          </div>
+        </div>
+
+        <!-- Confidence -->
+        <div class="result-card" id="cardConfidence">
+          <div class="result-icon">🎯</div>
+          <div class="result-label">Model Confidence</div>
+          <div class="confidence-ring-wrap">
+            <svg class="confidence-ring" viewBox="0 0 100 100">
+              <circle class="ring-bg" cx="50" cy="50" r="42" />
+              <circle class="ring-fill" id="ringFill" cx="50" cy="50" r="42"
+                      stroke-dasharray="264" stroke-dashoffset="264" />
+            </svg>
+            <div class="confidence-pct" id="valConfidence">0%</div>
+          </div>
+          <div class="result-unit">classifier confidence</div>
+        </div>
+
+      </div>
+
+      <!-- Model info -->
+      <div class="model-info" id="modelInfo">
+        <span class="model-chip">🔬 Regression: <b id="regModel">—</b></span>
+        <span class="model-chip">🧠 Classification: <b id="clfModel">—</b></span>
+      </div>
+
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-section">
+      <h2 class="how-title">How It Works</h2>
+      <div class="how-grid">
+        <div class="how-card">
+          <div class="how-num">01</div>
+          <div class="how-icon">📝</div>
+          <h3>Enter Details</h3>
+          <p>Select your crop, state, cultivated area in hectares, and the crop year.</p>
+        </div>
+        <div class="how-card">
+          <div class="how-num">02</div>
+          <div class="how-icon">⚙️</div>
+          <h3>ML Inference</h3>
+          <p>Two Random Forest models — one regressor and one classifier — process your input.</p>
+        </div>
+        <div class="how-card">
+          <div class="how-num">03</div>
+          <div class="how-icon">📊</div>
+          <h3>Get Results</h3>
+          <p>Receive predicted production, yield per hectare, risk category, and model confidence instantly.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>AgriPredict &mdash; BDA Project &bull; Indian Crop Production Dataset (1997–2015) &bull; 246K+ records</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

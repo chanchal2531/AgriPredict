@@ -1,0 +1,6 @@
+__pycache__/
+Data/
+
+*.pyc
+
+whilerun.txt
