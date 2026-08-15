@@ -1,4 +1,4 @@
-# 🌾 Smart Crop Prediction & Risk Analysis Backend System
+# AgriPredict
 
 A production-quality machine learning backend that predicts crop production, yield, and risk levels using Random Forest models, exposed via a Flask REST API.
 
